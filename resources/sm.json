@@ -1,0 +1,48 @@
+{
+  "name": "BPMN4ES",
+  "uri": "http://infosys.cs.rug.nl/schema/bpmn/bpmn4es",
+  "prefix": "bpmn4es",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "keyEnvironmentalIndicator",
+      "properties": [
+      	{
+          "name": "id",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "unit",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "targetValue",
+          "isAttr": true,
+          "type": "Real"
+        },
+        {
+          "name": "icon",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "environmentalIndicators",
+      "superClass": ["Element"],
+      "properties": [
+        {
+          "name": "indicators",
+          "isMany": true,
+          "type": "keyEnvironmentalIndicator"
+        }
+      ]
+    }
+  ],
+  "enumerations": [],
+  "associations": []
+}
