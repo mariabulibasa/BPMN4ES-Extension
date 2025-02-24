@@ -11,6 +11,12 @@ const INDICATORS = [
 				icon_name: "bolt",
 				unit: "kwh"
 			},
+      {
+				name: "Renewable Energy",
+				id: "renewable-energy",
+				icon_name: "sunny",
+				unit: "kwh"
+			},
 			{
 				name: "Transportation Energy",
 				id: "transportation-energy",
@@ -29,7 +35,18 @@ const INDICATORS = [
 				unit: "kg"
 			}
 		]
-	}
+	},
+  {
+    category: "waste",
+    indicators: [
+      {
+        name: "Recyclable Waste",
+        id: "recyclable-waste",
+        icon_name: "recycling",
+        unit: "kg"
+      }
+    ]
+  }
 ];
 
 

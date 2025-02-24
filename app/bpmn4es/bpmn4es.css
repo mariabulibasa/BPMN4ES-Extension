@@ -24,6 +24,10 @@
 	content: "eco";
 }
 
+.kei-icon-renewable-energy::before {
+	content: "sunny";
+}
+
 .kei-icon-energy-consumption::before {
 	content: "bolt";
 }
@@ -34,4 +38,8 @@
 
 .kei-icon-carbon-emissions::before {
 	content: "co2";
+}
+
+.kei-icon-recyclable-waste::before {
+	content: "recycling";
 }
