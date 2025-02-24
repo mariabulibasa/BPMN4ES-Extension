@@ -1,11 +1,8 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler';
-import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import diagramXML from '../resources/diagram.bpmn';
 import bpmn4esModule from './bpmn4es';
-import bpmn4esExtension from '../resources/sm';
+import bpmn4esExtension from '../resources/bpmn4es';
 import { saveAs } from 'file-saver';
-
-const HIGH_PRIORITY = 1500;
 
 const modeler = new BpmnModeler({
   container: '#container',
@@ -26,11 +23,7 @@ async function openDiagram(xml) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const containerEl = document.getElementById('container');
-  const saveButtonEl = document.getElementById('save-button');
-  let currentElement, businessObject;
-  
+document.addEventListener('DOMContentLoaded', () => {  
   openDiagram(diagramXML);
 
   document.getElementById('save-button').addEventListener('click', (e) => {
@@ -40,23 +33,4 @@ document.addEventListener('DOMContentLoaded', () => {
       saveAs(blob, 'diagram.bpmn');
     }).catch(err => console.error(err));
   });
-
-  // Open sustainability metrics if user right clicks on element
-  /*modeler.on('element.contextmenu', HIGH_PRIORITY, (event) => {
-    event.originalEvent.preventDefault();
-    event.originalEvent.stopPropagation();
-
-    currentElement = event.element;
-
-    // Ignore root element
-    if (!currentElement.parent) {
-      return;
-    }
-
-    businessObject = getBusinessObject(currentElement);
-  });*/
-
-  function getBusinessObject(element) {
-    return element.businessObject || element;
-  }
 });

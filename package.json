@@ -1,7 +1,7 @@
 {
   "name": "bpmn4es",
   "version": "0.1.0",
-  "description": "An example of how to support custom elements in bpmn-js while ensuring BPMN 2.0 compatibility.",
+  "description": "An extension of bpmn-js that supports the BPMN4ES notation.",
   "scripts": {
     "all": "run-s lint build",
     "build": "webpack --mode production",
@@ -16,7 +16,8 @@
     "url": "https://github.com/michel-medema/BPMN4ES"
   },
   "keywords": [
-    "bpmn4es"
+    "bpmn4es",
+    "environmental sustainability"
   ],
   "author": {
     "name": "Michel Medema",
@@ -25,18 +26,17 @@
   "license": "MIT",
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
-    "eslint": "^9.19.0",
-    "eslint-plugin-bpmn-io": "^2.1.0",
+    "eslint": "^9.21.0",
+    "eslint-plugin-bpmn-io": "^2.2.0",
     "npm-run-all": "^4.1.5",
     "raw-loader": "^4.0.2",
-    "sirv-cli": "^3.0.0",
-    "webpack": "^5.97.1",
+    "sirv-cli": "^3.0.1",
+    "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "bpmn-js": "^18.2.0",
+    "bpmn-js": "^18.3.1",
     "express": "^4.21.2",
-    "file-saver": "^2.0.5",
-    "min-dash": "^4.2.2"
+    "file-saver": "^2.0.5"
   }
 }

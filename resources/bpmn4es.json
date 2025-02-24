@@ -1,6 +1,7 @@
 {
+  "$schema": "https://unpkg.com/moddle/resources/schema/moddle.json",
   "name": "BPMN4ES",
-  "uri": "http://infosys.cs.rug.nl/schema/bpmn/bpmn4es",
+  "uri": "https://github.com/michel-medema/BPMN4ES",
   "prefix": "bpmn4es",
   "xml": {
     "tagAlias": "lowerCase"

@@ -1,5 +1,4 @@
-import { assign } from 'min-dash';
-import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
 export default class KeiContextPad {
   constructor(config, contextPad, create, elementFactory, injector, translate, popupMenu) {
@@ -16,11 +15,10 @@ export default class KeiContextPad {
     contextPad.registerProvider(this);
   }
   
-  getContextPadEntries(element) {
-  	const businessObject = element.businessObject;
-  	
+  getContextPadEntries(element) {  	
 		// Only add the KEI menu item for tasks and subprocesses.
-		if ( is(businessObject, 'bpmn:Task') || is(businessObject, 'bpmn:SubProcess') ) {
+    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess' ]) ) {
+		//if ( is(businessObject, 'bpmn:Task') || is(businessObject, 'bpmn:SubProcess') ) {
 		  const translate = this._translate;
 			const contextPad = this._contextPad;
 			const popupMenu = this._popupMenu;

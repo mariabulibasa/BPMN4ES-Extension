@@ -5,14 +5,18 @@ import {
   create as svgCreate
 } from 'tiny-svg';
 import { getRoundRectPath } from 'bpmn-js/lib/draw/BpmnRenderUtil';
-import { assign } from 'min-dash';
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
-import { componentsToPath, createLine } from 'diagram-js/lib/util/RenderUtil';
 import { getExtensionElement, hasExtensionElement } from './util.js';
 
-const HIGH_PRIORITY = 1500,
-  TASK_BORDER_RADIUS = 2;
+const HIGH_PRIORITY = 1500;
+const TASK_BORDER_RADIUS = 2;
+
+// The amount of space between the BPMN element and the bounding box of the KEI.
+const KEI_SPACING = 30;
+
+// The size of the indicator icon in pixels.
+const ICON_SIZE = 30;
 
 export default class KeiRenderer extends BaseRenderer {
   constructor(eventBus, bpmnRenderer, KeiContextPad) {
@@ -29,82 +33,115 @@ export default class KeiRenderer extends BaseRenderer {
   }
 
   // TODO: Place the icon in the middle if there is no target value to display.
-  drawShape(parentNode, element) {
-    // The width and height of the box around the KEI.
-    const KEI_WIDTH = 60;
-  	const KEI_HEIGHT = 80;
-  	// The amount of space between the BPMN element and the indicator.
-  	const KEI_SPACING = 30;
-  	// The size of the indicator icon in pixels.
-  	const ICON_SIZE = 40;
-  
+  drawShape(parentNode, element) {  
   	const businessObject = getBusinessObject(element);
   	
   	let environmentalIndicators = getExtensionElement(businessObject, 'bpmn4es:environmentalIndicators');
 		const indicator = environmentalIndicators.indicators[0];
-  
-  	console.log(indicator);
     
+    // TODO: Adjust width of the box based on width of the text of the target value.
+    const dimensions = this.computeBBoxDimensions(indicator);
+
+    // Create the element for the bounding box of the KEI.
+    const bbox = this.createBBox(element, dimensions);
+
+    // Create the element for the icon of the KEI.
+    const icon = this.createIcon(element, indicator, bbox);
+
+    // Create the line that connects the BPMN element to the KEI.
+		const line = this.createLine(element);
+		
+		// Draw the elements in reverse order to ensure that the line sits behind the BPMN element and KEI box 
+    // and that the icon and text are placed on top of the KEI box.
+		svgAppend(parentNode, line);
+    svgAppend(parentNode, bbox);
+    svgAppend(parentNode, icon);
+    
+    if ( indicator.targetValue ) {
+		  const text = this.createTargetValueText(element, indicator);
+		  svgAppend(parentNode, text);
+    }
+    
+    return this.bpmnRenderer.drawShape(parentNode, element);
+  }
+
+  createTargetValueText(element, indicator) {
+    const text = svgCreate('text');
+    svgAttr(text, {
+      x: element.width / 2,
+      y: -KEI_SPACING - 12,
+      'font-size': '12px',
+      'font-family': 'Arial, sans-serif',
+      fill: '#000000',
+      opacity: 1,
+      'text-anchor': 'middle' // Center the text
+    });
+    text.textContent = indicator.targetValue + " " + indicator.unit;
+
+    return text;
+  }
+
+  createLine(element) {
+    const line = svgCreate('line');
+		svgAttr(line, {
+		  'x1': element.width / 2, // Start point
+		  'y1': 0, // Start point
+		  'x2': element.width / 2, // End point
+		  'y2': -KEI_SPACING, // End point
+      'stroke': '#000', // Line color
+      'stroke-width': '1', // Line thickness
+      'stroke-dasharray': '5, 5' // 5px dash, 5px gap
+    });
+
+    return line;
+  }
+
+  createIcon(element, indicator, bbox) {
+    const height = Number(svgAttr(bbox, "height"));
+    const y = Number(svgAttr(bbox, "y"));
+
+    let offset = (height - ICON_SIZE) / 2;
+
+    if ( indicator.targetValue ) {
+      offset = 8;
+    }
+
     // A text box for the icon, which is embedded in a font.
     const icon = svgCreate('text');
-    //icon.setAttribute('x', element.width / 2); // Place the icon in the middle of the rectangle.
-    //icon.setAttribute('y', -KEI_HEIGHT - KEI_SPACING + ICON_SIZE + 7); // Place the icon near the top.
 	  svgAttr(icon, {
 	    x: element.width / 2, // Place the icon in the middle of the rectangle.
-	    y: -KEI_HEIGHT - KEI_SPACING + ICON_SIZE + 7, // Place the icon near the top.
+	    y: y + ICON_SIZE + offset,//-bbox.height - KEI_SPACING + ICON_SIZE + 7, // Place the icon near the top.
 	    'font-size': ICON_SIZE + 'px',
 	    'class': 'material-symbols-outlined',
 	    'text-anchor': 'middle' // Center the text
 	  });
 	  icon.textContent = indicator.icon; // The extension element itself carries the content that needs to be placed here in order to render the icon.
-      
-    // The rectangle for the KEI that is placed above the BPMN element.
+
+    return icon;
+  }
+
+  computeBBoxDimensions(indicator) {
+    // Make the bounding box slightly taller if a target value needs to be rendered.
+    if ( indicator.targetValue ) {
+      return { width: 60, height: 70 };
+    } else {
+      return { width: 50, height: 50 };
+    }
+  }
+
+  // Create the bounding box for the KEI that is placed above the BPMN element.
+  createBBox(element, dimensions) {
     const rect = svgCreate('rect');
     svgAttr(rect, {
-      x: 0,
-      y: 0,
-      'width': KEI_WIDTH,
-      'height': KEI_HEIGHT,
+      x: (element.width / 2) - (dimensions.width / 2),
+      y: -dimensions.height - KEI_SPACING,
+      'width': dimensions.width,
+      'height': dimensions.height,
       'fill': '#ffffff',
-      'stroke': '#000000',
-      transform: 'translate('+((element.width / 2) - (KEI_WIDTH / 2))+', '+(-KEI_HEIGHT - KEI_SPACING)+')'
+      'stroke': '#000000'
     });
-    
-    // Define the line that connects the BPMN element to the KEI.
-  	const startX = element.x + element.width; // Right edge of the task
-		const startY = element.y + element.height / 2; // Vertical center of the task
-		const line = svgCreate('line');
-		svgAttr(line, {
-		  'x1': element.width / 2, // Start point
-		  'y1': 5, // Start point
-		  'x2': element.width / 2, // End point
-		  'y2': -KEI_HEIGHT, // End point
-      'stroke': '#000', // Line color
-      'stroke-width': '2', // Line thickness
-      'stroke-dasharray': '5, 5' // 5px dash, 5px gap
-    });
-		
-		// Draw the elements in reverse order to ensure that the line sits behind the BPMN element and KEI box and that the icon and text are placed on top of the KEI box.
-		svgAppend(parentNode, line);
-    svgAppend(parentNode, rect);
-    svgAppend(parentNode, icon);
-    
-    if ( indicator.targetValue ) {
-		  const text = svgCreate('text');
-		  svgAttr(text, {
-		    x: element.width / 2,
-		    y: -KEI_SPACING - 12,
-		    'font-size': '12px',
-		    fill: '#000000',
-		    opacity: 1,
-		    'text-anchor': 'middle' // Center the text
-		  });
-		  text.textContent = indicator.targetValue + " " + indicator.unit;
-		  
-		  svgAppend(parentNode, text);
-    }
-    
-    return this.bpmnRenderer.drawShape(parentNode, element);
+
+    return rect;
   }
 
   getShapePath(shape) {

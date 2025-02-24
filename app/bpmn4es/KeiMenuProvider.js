@@ -33,7 +33,7 @@ const INDICATORS = [
 ];
 
 
-export default function KeiMenuProvider(config, bpmnRendererConfig, popupMenu, modeling, moddle, translate) {
+export default function KeiMenuProvider(popupMenu, modeling, moddle, translate) {
   this._popupMenu = popupMenu;
   this._modeling = modeling;
   this._translate = translate;
@@ -45,8 +45,6 @@ export default function KeiMenuProvider(config, bpmnRendererConfig, popupMenu, m
 }
 
 KeiMenuProvider.$inject = [
-  'config.colorPicker',
-  'config.bpmnRenderer',
   'popupMenu',
   'modeling',
   'moddle',
@@ -63,7 +61,6 @@ KeiMenuProvider.prototype.getEntries = function(target) {
   		return {
 		    title: self._translate(indicator.name),
 		    label: self._translate(indicator.name),
-		    //imageUrl: indicator.icon,
 		    className: 'kei-icon kei-icon-' + indicator.id,
 		    id: indicator.id,
 		    group: category,
@@ -75,6 +72,7 @@ KeiMenuProvider.prototype.getEntries = function(target) {
   return entries;
 };
 
+// TODO: These values should be set through a properties panel.
 function createAction(moddle, modeling, target, indicator) {
   return function(event, entry) {
   	console.log(target);
