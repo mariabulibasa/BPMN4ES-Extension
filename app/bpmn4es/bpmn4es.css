@@ -1,4 +1,4 @@
-.material-symbols-outlined, .kei-icon::before {
+.material-symbols-outlined, .kei-icon::before, .sustainability-icon::before{
   font-variation-settings:
   'FILL' 0,
   'wght' 200,
@@ -6,7 +6,8 @@
   'opsz' 24
 }
 
-.kei-icon::before {
+.kei-icon::before,
+.sustainability-icon::before {
 	font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
@@ -42,4 +43,13 @@
 
 .kei-icon-recyclable-waste::before {
 	content: "recycling";
+}
+
+
+.sustainability-icon-carbon-emissions::before {
+	content: "co2";
+}
+
+.sustainability-icon-water-waste::before {
+	content: "water_drop";
 }

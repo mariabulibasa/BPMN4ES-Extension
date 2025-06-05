@@ -1,7 +1,7 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import diagramXML from '../resources/diagram.bpmn';
 import bpmn4esModule from './bpmn4es';
-import bpmn4esExtension from '../resources/bpmn4es';
+import bpmn4esExtension from '../resources/bpmn4es.json';
 import { saveAs } from 'file-saver';
 
 const modeler = new BpmnModeler({
