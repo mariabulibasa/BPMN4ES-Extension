@@ -1,23 +1,20 @@
 import KeiContextPad from './KeiContextPad';
 import KeiRenderer from './KeiRenderer';
 import KeiMenuProvider from './KeiMenuProvider';
-import SustainabilityContextPadProvider from './SustainabilityContextPadProvider';
-import SustainabilityMenuProvider       from './SustainabilityMenuProvider';
-import SustainabilityRenderer           from './SustainabilityRenderer';
+import KeiEventRenderer from './KeiEventRenderer';
+import ClearKEIOnReplace          from './ClearKeiOnReplace';
 
 export default {
   __init__: [
     'keiContextPad',
     'keiRenderer',
     'keiMenuProvider',
-    'sustainabilityContextPadProvider',
-    'sustainabilityMenuProvider',
-    'sustainabilityRenderer'
+    'keiEventRenderer',
+    'clearKeiOnReplace'
   ],
   keiContextPad:                        ['type', KeiContextPad],
   keiRenderer:                         ['type', KeiRenderer],
   keiMenuProvider:                     ['type', KeiMenuProvider],
-  sustainabilityContextPadProvider:    ['type', SustainabilityContextPadProvider],
-  sustainabilityMenuProvider:          ['type', SustainabilityMenuProvider],
-  sustainabilityRenderer:              ['type', SustainabilityRenderer]
+  keiEventRenderer:                     ['type', KeiEventRenderer],
+  clearKeiOnReplace:              ['type', ClearKEIOnReplace],
 };

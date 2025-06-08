@@ -15,12 +15,13 @@ export function hasExtensionElement(element, type) {
 
 
 export function getStartPosition(contextPad, element) {
+  const Y_OFFSET = 5;
   const pad = contextPad.getPad(element).html;
   const rect = pad.getBoundingClientRect();
 
   return {
     x: rect.left,
-    y: rect.bottom + 5
+    y: rect.bottom + Y_OFFSET
   };
 }
 

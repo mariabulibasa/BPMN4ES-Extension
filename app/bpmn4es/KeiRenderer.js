@@ -2,7 +2,8 @@ import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
 import {
   append as svgAppend,
   attr as svgAttr,
-  create as svgCreate
+  create as svgCreate,
+  remove as svgRemove
 } from 'tiny-svg';
 import { getRoundRectPath } from 'bpmn-js/lib/draw/BpmnRenderUtil';
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
@@ -26,19 +27,24 @@ export default class KeiRenderer extends BaseRenderer {
   }
 
   canRender(element) {
-  	const businessObject = getBusinessObject(element);
-  
-  	// only render tasks and subprocesses with KEIs.
-	  return isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess' ]) && !element.labelTarget && hasExtensionElement(businessObject, 'bpmn4es:environmentalIndicators');
+    const businessObject = getBusinessObject(element);
+
+    // only render tasks and subprocesses with KEIs.
+    return isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess' ]) && !element.labelTarget && hasExtensionElement(businessObject, 'bpmn4es:environmentalIndicators');
   }
 
   // TODO: Place the icon in the middle if there is no target value to display.
-  drawShape(parentNode, element) {  
-  	const businessObject = getBusinessObject(element);
-  	
-  	let environmentalIndicators = getExtensionElement(businessObject, 'bpmn4es:environmentalIndicators');
-		const indicator = environmentalIndicators.indicators[0];
-    
+  drawShape(parentNode, element) {
+
+    // Clear previous KEI decorations
+    Array
+      .from(parentNode.querySelectorAll('.kei-deco'))
+      .forEach(node => svgRemove(node));
+
+    const businessObject = getBusinessObject(element);
+    let environmentalIndicators = getExtensionElement(businessObject, 'bpmn4es:environmentalIndicators');
+    const indicator = environmentalIndicators.indicators[0];
+
     // TODO: Adjust width of the box based on width of the text of the target value.
     const dimensions = this.computeBBoxDimensions(indicator);
 
@@ -49,25 +55,27 @@ export default class KeiRenderer extends BaseRenderer {
     const icon = this.createIcon(element, indicator, bbox);
 
     // Create the line that connects the BPMN element to the KEI.
-		const line = this.createLine(element);
-		
-		// Draw the elements in reverse order to ensure that the line sits behind the BPMN element and KEI box 
+    const line = this.createLine(element);
+    
+    // Draw the elements in reverse order to ensure that the line sits behind the BPMN element and KEI box 
     // and that the icon and text are placed on top of the KEI box.
-		svgAppend(parentNode, line);
+    svgAppend(parentNode, line);
     svgAppend(parentNode, bbox);
     svgAppend(parentNode, icon);
-    
+
     if ( indicator.targetValue ) {
-		  const text = this.createTargetValueText(element, indicator);
-		  svgAppend(parentNode, text);
+      const text = this.createTargetValueText(element, indicator);
+      svgAppend(parentNode, text);
     }
-    
+
+    // Draw the BPMN element on top
     return this.bpmnRenderer.drawShape(parentNode, element);
   }
 
   createTargetValueText(element, indicator) {
     const text = svgCreate('text');
     svgAttr(text, {
+      'class': 'kei-deco',
       x: element.width / 2,
       y: -KEI_SPACING - 12,
       'font-size': '12px',
@@ -83,11 +91,12 @@ export default class KeiRenderer extends BaseRenderer {
 
   createLine(element) {
     const line = svgCreate('line');
-		svgAttr(line, {
-		  'x1': element.width / 2, // Start point
-		  'y1': 0, // Start point
-		  'x2': element.width / 2, // End point
-		  'y2': -KEI_SPACING, // End point
+    svgAttr(line, {
+      'class': 'kei-deco',
+      'x1': element.width / 2, // Start point
+      'y1': 0, // Start point
+      'x2': element.width / 2, // End point
+      'y2': -KEI_SPACING, // End point
       'stroke': '#000', // Line color
       'stroke-width': '1', // Line thickness
       'stroke-dasharray': '5, 5' // 5px dash, 5px gap
@@ -101,21 +110,20 @@ export default class KeiRenderer extends BaseRenderer {
     const y = Number(svgAttr(bbox, "y"));
 
     let offset = (height - ICON_SIZE) / 2;
-
     if ( indicator.targetValue ) {
       offset = 8;
     }
 
     // A text box for the icon, which is embedded in a font.
     const icon = svgCreate('text');
-	  svgAttr(icon, {
-	    x: element.width / 2, // Place the icon in the middle of the rectangle.
-	    y: y + ICON_SIZE + offset,//-bbox.height - KEI_SPACING + ICON_SIZE + 7, // Place the icon near the top.
-	    'font-size': ICON_SIZE + 'px',
-	    'class': 'material-symbols-outlined',
-	    'text-anchor': 'middle' // Center the text
-	  });
-	  icon.textContent = indicator.icon; // The extension element itself carries the content that needs to be placed here in order to render the icon.
+    svgAttr(icon, {
+      'class': 'material-symbols-outlined kei-deco',
+      x: element.width / 2, // Place the icon in the middle of the rectangle.
+      y: y + ICON_SIZE + offset,//-bbox.height - KEI_SPACING + ICON_SIZE + 7, // Place the icon near the top.
+      'font-size': ICON_SIZE + 'px',
+      'text-anchor': 'middle' // Center the text
+    });
+    icon.textContent = indicator.icon; // The extension element itself carries the content that needs to be placed here in order to render the icon.
 
     return icon;
   }
@@ -133,6 +141,7 @@ export default class KeiRenderer extends BaseRenderer {
   createBBox(element, dimensions) {
     const rect = svgCreate('rect');
     svgAttr(rect, {
+      'class': 'kei-deco',
       x: (element.width / 2) - (dimensions.width / 2),
       y: -dimensions.height - KEI_SPACING,
       'width': dimensions.width,

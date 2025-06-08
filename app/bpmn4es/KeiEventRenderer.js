@@ -1,15 +1,11 @@
-/**
- * File: SustainabilityRenderer.js
- * Draws sustainability start events with icon *inside* the circle, based on the assigned KEI.
- */
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
-import { append as svgAppend, attr as svgAttr, create as svgCreate } from 'tiny-svg';
+import { append as svgAppend, attr as svgAttr, create as svgCreate, remove as svgRemove } from 'tiny-svg';
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import { hasExtensionElement, getExtensionElement } from './util.js';
 
-const HIGH_PRIORITY = 2000;
+const HIGH_PRIORITY = 2001;
 
-export default class SustainabilityRenderer extends BaseRenderer {
+export default class KeiEventRenderer extends BaseRenderer {
   constructor(eventBus, bpmnRenderer) {
     super(eventBus, HIGH_PRIORITY);
     this.bpmnRenderer = bpmnRenderer;
@@ -17,41 +13,47 @@ export default class SustainabilityRenderer extends BaseRenderer {
 
   canRender(element) {
     const bo = getBusinessObject(element);
-    return is(element, 'bpmn:IntermediateThrowEvent') && hasExtensionElement(bo, 'bpmn4es:environmentalIndicators');
+
+    // Only render intermediate throws & boundary events with a KEI
+    return (is(element, 'bpmn:IntermediateThrowEvent') || is(element, 'bpmn:BoundaryEvent'))
+      && !element.labelTarget
+      && hasExtensionElement(bo, 'bpmn4es:environmentalIndicators');
   }
 
   drawShape(parentGfx, element) {
-    // Draw default BPMN StartEvent shape
+    // Clear previous event and KEI decorations 
+    Array.from(parentGfx.childNodes).forEach(node => svgRemove(node));
+
+    // Draw the normal BPMN event 
     const shape = this.bpmnRenderer.drawShape(parentGfx, element);
 
-    const bo = getBusinessObject(element);
-    const indicators = getExtensionElement(bo, 'bpmn4es:environmentalIndicators');
-    const kei = indicators?.indicators?.[0];
+    // Render KEI icon and value
+    const bo  = getBusinessObject(element);
+    const env = getExtensionElement(bo, 'bpmn4es:environmentalIndicators');
+    const kei = env.indicators[0];
 
     if (kei?.icon) {
-      // Draw icon inside StartEvent
       const iconText = svgCreate('text');
       svgAttr(iconText, {
+        'class': 'material-symbols-outlined kei-deco',
         x: element.width / 2,
         y: element.height / 2 + 10,
         'font-size': '18px',
-        'text-anchor': 'middle',
-        'class': 'material-symbols-outlined'
-        
+        'text-anchor': 'middle'
       });
       iconText.textContent = kei.icon;
       svgAppend(parentGfx, iconText);
     }
 
     if (kei?.targetValue) {
-      // Optional: display target value under icon
       const valueText = svgCreate('text');
       svgAttr(valueText, {
+        'class': 'kei-deco',
         x: element.width / 2,
         y: element.height / 2 + 35,
         'font-size': '11px',
         'text-anchor': 'middle',
-        'fill': '#333'
+        fill: '#333'
       });
       valueText.textContent = kei.targetValue + ' ' + kei.unit;
       svgAppend(parentGfx, valueText);
@@ -61,4 +63,4 @@ export default class SustainabilityRenderer extends BaseRenderer {
   }
 }
 
-SustainabilityRenderer.$inject = ['eventBus', 'bpmnRenderer'];
+KeiEventRenderer.$inject = ['eventBus', 'bpmnRenderer'];

@@ -1,4 +1,6 @@
 import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
+import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
+import { getStartPosition, hasExtensionElement } from './util.js';
 
 export default class KeiContextPad {
   constructor(config, contextPad, create, elementFactory, injector, translate, popupMenu) {
@@ -14,51 +16,45 @@ export default class KeiContextPad {
 
     contextPad.registerProvider(this);
   }
-  
-  getContextPadEntries(element) {  	
-		// Only add the KEI menu item for tasks and subprocesses.
-    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess' ]) ) {
-		//if ( is(businessObject, 'bpmn:Task') || is(businessObject, 'bpmn:SubProcess') ) {
-		  const translate = this._translate;
-			const contextPad = this._contextPad;
-			const popupMenu = this._popupMenu;
 
-			return {
-				'add.kei': {
-				  group: 'kei',
-				  className: 'kei-icon kei-icon-leaf',
-				  title: translate('Assign KEI'),
-				  action: {
-				    click: (event, element) => {
-				      const position = {
-				        ...getStartPosition(contextPad, element),
-				        cursor: {
-				          x: event.x,
-				          y: event.y
-				        }
-				      };
-				      popupMenu.open(element, 'kei-selector', position);
-				    }
-				  }
-				}
-			};
-		} else {
-			return {};
-		}
-	}
-}
+  getContextPadEntries(element) {
+    const { _contextPad: contextPad, _translate: translate, _popupMenu: popupMenu } = this;
 
-function getStartPosition(contextPad, elements) {
-  const Y_OFFSET = 5;
+    // Only add the full KEI menu item for tasks, subprocesses and intermediate throw events
+    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess', 'bpmn:IntermediateThrowEvent' ]) ) {
+      return makeEntry();
 
-  const pad = contextPad.getPad(elements).html;
+    // Only add the KEI menu for boundary events that are attached to KEI activities. 
+    // In that case, the menu for the boundary event will only contain the same KEI that is attached to the activity, not the full KEI list.
+    } else if ( isAny(element, [ 'bpmn:BoundaryEvent' ]) ) {
+      const hostBusinessObject = element.host && getBusinessObject(element.host);
+      if ( hostBusinessObject && hasExtensionElement(hostBusinessObject, 'bpmn4es:environmentalIndicators') ) {
+        return makeEntry();
+      }
+    }
 
-  const padRect = pad.getBoundingClientRect();
+    return {};
 
-  return {
-    x: padRect.left,
-    y: padRect.bottom + Y_OFFSET
-  };
+    // Function for displaying the leaf menu
+    function makeEntry() {
+      return {
+        'add.kei': {
+          group: 'kei',
+          className: 'kei-icon kei-icon-leaf',
+          title: translate('Assign KEI'),
+          action: {
+            click: (event, element) => {
+              const position = {
+                ...getStartPosition(contextPad, element),
+                cursor: { x: event.x, y: event.y }
+              };
+              popupMenu.open(element, 'kei-selector', position);
+            }
+          }
+        }
+      };
+    }
+  }
 }
 
 KeiContextPad.$inject = [
