@@ -13,9 +13,8 @@ export default class KeiEventRenderer extends BaseRenderer {
 
   canRender(element) {
     const bo = getBusinessObject(element);
-
     // Only render intermediate throws & boundary events with a KEI
-    return (is(element, 'bpmn:IntermediateThrowEvent') || is(element, 'bpmn:BoundaryEvent'))
+    return (is(element, 'bpmn:IntermediateThrowEvent') || is(element, 'bpmn:BoundaryEvent') || is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:StartEvent'))
       && !element.labelTarget
       && hasExtensionElement(bo, 'bpmn4es:environmentalIndicators');
   }

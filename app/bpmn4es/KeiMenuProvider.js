@@ -20,13 +20,12 @@ const INDICATORS = [
     category: 'waste',
     indicators: [
       { name: 'Recyclable Waste',      id: 'recyclable-waste',      icon_name: 'recycling',      unit: 'kg'     },
-      { name: 'Water Waste',           id: 'water-waste',           icon_name: 'water_drop',     unit: 'liters' }
     ]
   },
   {
     category: 'water',
     indicators: [
-      { name: 'Water Waste',           id: 'water-waste',           icon_name: 'water_drop',     unit: 'liters' }
+      { name: 'Water Consumption',           id: 'water-waste',           icon_name: 'water_drop',     unit: 'liters' }
     ]
   }
 ];

@@ -21,7 +21,7 @@ export default class KeiContextPad {
     const { _contextPad: contextPad, _translate: translate, _popupMenu: popupMenu } = this;
 
     // Only add the full KEI menu item for tasks, subprocesses and intermediate throw events
-    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess', 'bpmn:IntermediateThrowEvent' ]) ) {
+    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:StartEvent' ]) ) {
       return makeEntry();
 
     // Only add the KEI menu for boundary events that are attached to KEI activities. 
