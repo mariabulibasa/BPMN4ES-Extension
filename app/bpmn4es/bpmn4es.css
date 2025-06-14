@@ -52,3 +52,89 @@
 .kei-icon-water-waste::before {
 	content: "water_drop";
 }
+
+.leaf-dialog {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  min-width: 320px;
+  max-width: 400px;
+  z-index: 10000;
+}
+
+.ld-header {
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+}
+
+.ld-body {
+  padding: 16px;
+}
+
+.ld-row {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ld-row label {
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.ld-row select,
+.ld-row input {
+  width: 100%;
+  padding: 8px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.ld-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+}
+
+.ld-footer button {
+  padding: 7px 16px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.ld-footer #ld-ok {
+  background-color: #0b74de;
+  color: white;
+  border-color: #0b74de;
+}
+
+.ld-footer #ld-ok:hover {
+  background-color: #095bb5;
+}
+
+.ld-footer #ld-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+  border-color: #ccc;
+}
+
+.ld-footer #ld-cancel:hover {
+  background-color: #e0e0e0;
+}
