@@ -38,6 +38,16 @@ export default class SequenceFlowContextPad {
     const visitedElements = new Set();  // used to prevent cycles
     const keiTaskMap = new Map();       // collect tasks with KEI indicators
 
+    const KEI_SHORT_NAMES = {
+      'carbon-emissions': 'CO2',
+      'renewable-energy': 'RenewEnergy',
+      'energy-consumption': 'EnergyConsumption',
+      'transportation-energy': 'TransportEnergy',
+      'recyclable-waste': 'RecycleWaste',
+      'water-waste': 'WaterConsumption',
+      'battery-charging-full': 'Battery'
+    };
+
     function hasKEIExtension(elementBO) {
       const extensions = elementBO.extensionElements;
       if (!extensions) return false;
@@ -74,11 +84,19 @@ export default class SequenceFlowContextPad {
     // Start from the XOR gateway
     traverseUpstream(gatewayBO);
 
-    // Create a list of processv variables for the dropdown (task names)
-    const availableVariables = Array.from(keiTaskMap.values()).map(taskBO => ({
-      id: taskBO.id,
-      name: taskBO.name || taskBO.id
-    }));
+    // Create a list of process variables for the dropdown (task names + KEI)
+    const availableVariables = Array.from(keiTaskMap.values()).map(taskBO => {
+      const taskName = (taskBO.name || taskBO.id).replace(/\s+/g, '');
+      const keiExtension = taskBO.extensionElements.values.find(e => e.$type === 'bpmn4es:environmentalIndicators');
+      const kei = keiExtension?.indicators?.[0];
+      const keiId = kei?.id || 'unknown';
+      const keiShort = KEI_SHORT_NAMES[keiId] || keiId;
+      return {
+        id: taskBO.id,
+        label: `${taskName}_${keiShort}`,
+        keiId
+      };
+    });
 
     // Build and display the popup dialog 
     const dialog = document.createElement('div');
@@ -90,7 +108,7 @@ export default class SequenceFlowContextPad {
           <label>Variable:
             <select id="ld-var">
               ${availableVariables.length
-                ? availableVariables.map(v => `<option value="${v.id}">${v.name}</option>`).join('\n')
+                ? availableVariables.map(v => `<option value="${v.id}">${v.label}</option>`).join('\n')
                 : '<option disabled>(No KEI tasks found)</option>'}
             </select>
           </label>
@@ -111,8 +129,6 @@ export default class SequenceFlowContextPad {
         <button id="ld-cancel">Cancel</button>
       </div>
     `;
-
-    // Append the dialog to <body> as a fixed-position modal
     document.body.appendChild(dialog);
 
     // Close the dialog if clicking outside of it 
@@ -126,30 +142,28 @@ export default class SequenceFlowContextPad {
       document.addEventListener('mousedown', handleOutsideClick);
     }, 0);
 
-    // Cancel button for closing the dialog 
-    dialog.querySelector('#ld-cancel')
-      .addEventListener('click', closeDialog);
+    // Cancel button for closing the dialog
+    dialog.querySelector('#ld-cancel').addEventListener('click', closeDialog);
+
+    const operatorInput = dialog.querySelector('#ld-operator');
+    const valueInput = dialog.querySelector('#ld-value');
+    const okButton = dialog.querySelector('#ld-ok');
 
     // Enable OK button only when operator and value are filled 
-    const operatorInput = dialog.querySelector('#ld-operator');
-    const valueInput    = dialog.querySelector('#ld-value');
-    const okButton      = dialog.querySelector('#ld-ok');
-
     const updateOkButtonState = () => {
-      const isValid = operatorInput.value.trim() && valueInput.value.trim();
-      okButton.disabled = !isValid;
+      okButton.disabled = !(operatorInput.value.trim() && valueInput.value.trim());
     };
 
     operatorInput.addEventListener('input', updateOkButtonState);
     valueInput.addEventListener('input', updateOkButtonState);
 
     // OK button writes the expression to the sequence flow 
-    okButton.addEventListener('click', () => {
-      const variableSelect = dialog.querySelector('#ld-var');
-      const selectedVariableName = variableSelect.options[variableSelect.selectedIndex].text;
-      const operator = operatorInput.value.trim();
-      const value    = valueInput.value.trim();
-      const expression = `${selectedVariableName} ${operator} ${value}`.trim();
+    okButton.onclick = () => {
+      const selectedId = dialog.querySelector('#ld-var').value;
+      const selectedTask = availableVariables.find(v => v.id === selectedId);
+      const op = operatorInput.value.trim();
+      const val = valueInput.value.trim();
+      const expression = `${selectedTask.label} ${op} ${val}`;
 
       // Update both the label and the runtime condition
       this.modeling.updateProperties(sequenceFlowElement, {
@@ -161,7 +175,7 @@ export default class SequenceFlowContextPad {
       });
 
       closeDialog();
-    });
+    };
 
     // Remove the dialog and listener 
     function closeDialog() {

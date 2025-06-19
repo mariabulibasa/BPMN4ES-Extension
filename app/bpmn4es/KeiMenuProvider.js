@@ -5,9 +5,10 @@ const INDICATORS = [
   {
     category: 'energy',
     indicators: [
-      { name: 'Energy Consumption',    id: 'energy-consumption',    icon_name: 'bolt',           unit: 'kwh'    },
-      { name: 'Renewable Energy',      id: 'renewable-energy',      icon_name: 'sunny',          unit: 'kwh'    },
-      { name: 'Transportation Energy', id: 'transportation-energy', icon_name: 'local_shipping', unit: 'kwh'    }
+      { name: 'Energy Consumption',    id: 'energy-consumption',    icon_name: 'bolt',                  unit: 'kwh'},
+      { name: 'Renewable Energy',      id: 'renewable-energy',      icon_name: 'sunny',                 unit: 'kwh'},
+      { name: 'Transportation Energy', id: 'transportation-energy', icon_name: 'local_shipping',        unit: 'kwh'},
+      { name: 'Battery',               id: 'battery-charging-full', icon_name: 'battery_charging_full', unit: '%'}
     ]
   },
   {
@@ -144,5 +145,15 @@ function createAction(ctx, target, indicator, nonInterrupting) {
     // Force redraw
     const gfx = ctx._elementRegistry.getGraphics(target);
     ctx._eventBus.fire('render.shape', { element: target, gfx });
+
+    // Redraw attached boundaries if we're editing a task, in order for the error icon to be visible if the 
+    // kei of the event differs from the kei of the task
+    if (target.type === 'bpmn:Task' || target.type === 'bpmn:SubProcess') {
+      const attached = target.attachers || [];
+      attached.forEach(boundary => {
+        const gfxBoundary = ctx._elementRegistry.getGraphics(boundary);
+        ctx._eventBus.fire('render.shape', { element: boundary, gfx: gfxBoundary });
+      });
+    }
   };
 }
