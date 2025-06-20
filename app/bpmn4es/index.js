@@ -4,6 +4,7 @@ import KeiMenuProvider from './KeiMenuProvider';
 import KeiEventRenderer from './KeiEventRenderer';
 import ClearKEIOnReplace from './ClearKeiOnReplace';
 import SequenceFlowContextPad from './SequenceFlowContextPad';
+import KeiReplaceMenuProvider from './KeiReplaceMenuProvider';
 
 export default {
   __init__: [
@@ -12,12 +13,14 @@ export default {
     'keiMenuProvider',
     'keiEventRenderer',
     'clearKeiOnReplace',
-    'sequenceFlowContextPad'
+    'sequenceFlowContextPad',
+    'keiReplaceMenuProvider'
   ],
   keiContextPad:                        ['type', KeiContextPad],
   keiRenderer:                         ['type', KeiRenderer],
   keiMenuProvider:                     ['type', KeiMenuProvider],
   keiEventRenderer:                     ['type', KeiEventRenderer],
   clearKeiOnReplace:              ['type', ClearKEIOnReplace],
-  sequenceFlowContextPad:     ['type', SequenceFlowContextPad]
+  sequenceFlowContextPad:     ['type', SequenceFlowContextPad],
+  keiReplaceMenuProvider:   ['type', KeiReplaceMenuProvider]
 };

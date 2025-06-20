@@ -1,5 +1,4 @@
 import { isAny } from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
-import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import { getStartPosition, hasExtensionElement } from './util.js';
 
 export default class KeiContextPad {
@@ -20,18 +19,10 @@ export default class KeiContextPad {
   getContextPadEntries(element) {
     const { _contextPad: contextPad, _translate: translate, _popupMenu: popupMenu } = this;
 
-    // Only add the full KEI menu item for tasks, subprocesses and intermediate throw events
-    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:StartEvent' ]) ) {
+    // Only add the full KEI menu item for tasks and subprocesses
+    if ( isAny(element, [ 'bpmn:Task', 'bpmn:SubProcess']) ) {
       return makeEntry();
-
-    // Only add the KEI menu for boundary events that are attached to KEI activities. 
-    // In that case, the menu for the boundary event will only contain the same KEI that is attached to the activity, not the full KEI list.
-    } else if ( isAny(element, [ 'bpmn:BoundaryEvent' ]) ) {
-      const hostBusinessObject = element.host && getBusinessObject(element.host);
-      if ( hostBusinessObject && hasExtensionElement(hostBusinessObject, 'bpmn4es:environmentalIndicators') ) {
-        return makeEntry();
-      }
-    }
+    } 
 
     return {};
 

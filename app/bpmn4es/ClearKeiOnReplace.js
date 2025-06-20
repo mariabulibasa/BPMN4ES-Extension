@@ -8,7 +8,8 @@ export default function ClearKeiOnReplace(eventBus, modeling) {
     const newShape = context.newShape;
 
     // Only for elements where KEIs are rendered
-    if ( isAny(newShape, [ 'bpmn:BoundaryEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:Task', 'bpmn:Subprocess', 'bpmn:IntermediateCatchEvent', 'bpmn:StartEvent' ]) ) {
+    if ( isAny(newShape, [ 'bpmn:BoundaryEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:Task', 
+      'bpmn:Subprocess', 'bpmn:IntermediateCatchEvent', 'bpmn:StartEvent', 'bpmn:EndEvent' ]) ) {
 
       const bo = getBusinessObject(newShape),
             ext = bo.extensionElements;
