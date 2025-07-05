@@ -1,10 +1,10 @@
-import KeiContextPad from './KeiContextPad';
-import KeiRenderer from './KeiRenderer';
-import KeiMenuProvider from './KeiMenuProvider';
-import KeiEventRenderer from './KeiEventRenderer';
+import KeiContextPad from './tasks/KeiContextPad';
+import KeiRenderer from './tasks/KeiRenderer';
+import KeiMenuProvider from './tasks/KeiMenuProvider';
+import KeiEventRenderer from './events/KeiEventRenderer';
 import ClearKEIOnReplace from './ClearKeiOnReplace';
-import SequenceFlowContextPad from './SequenceFlowContextPad';
-import KeiReplaceMenuProvider from './KeiReplaceMenuProvider';
+import SequenceFlowContextPad from './decisions/SequenceFlowContextPad';
+import KeiReplaceMenuProvider from './events/KeiReplaceMenuProvider';
 
 export default {
   __init__: [

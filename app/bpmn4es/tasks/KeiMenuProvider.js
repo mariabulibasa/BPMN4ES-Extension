@@ -1,59 +1,6 @@
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
-import { getExtensionElement } from './util.js';
-
-const INDICATORS = [
-	{
-		category: "energy",
-		indicators: [
-			{
-				name: "Energy Consumption",
-				id: "energy-consumption",
-				icon_name: "bolt",
-				unit: "kwh"
-			},
-      {
-				name: "Renewable Energy",
-				id: "renewable-energy",
-				icon_name: "sunny",
-				unit: "kwh"
-			},
-			{
-				name: "Transportation Energy",
-				id: "transportation-energy",
-				icon_name: "local_shipping",
-				unit: "kwh"
-			},
-      { name: 'Battery',               
-        id: 'battery-charging-full', 
-        icon_name: 'battery_charging_full', 
-        unit: '%'
-      }
-		]
-	},
-	{
-		category: "emissions",
-		indicators: [
-			{
-				name: "Carbon Emissions",
-				id: "carbon-emissions",
-				icon_name: "co2",
-				unit: "kg"
-			}
-		]
-	},
-  {
-    category: "waste",
-    indicators: [
-      {
-        name: "Recyclable Waste",
-        id: "recyclable-waste",
-        icon_name: "recycling",
-        unit: "kg"
-      }
-    ]
-  }
-];
-
+import { getExtensionElement } from '../util.js';
+import { INDICATORS_TASKS } from '../KeiTypes.js';
 
 export default function KeiMenuProvider(popupMenu, modeling, moddle, translate, eventBus, elementRegistry) {
   this._popupMenu = popupMenu;
@@ -63,7 +10,7 @@ export default function KeiMenuProvider(popupMenu, modeling, moddle, translate, 
   this._eventBus = eventBus;
   this._elementRegistry = elementRegistry;
 
-	this._indicators = INDICATORS;
+	this._indicators = INDICATORS_TASKS;
 
   this._popupMenu.registerProvider('kei-selector', this);
 }

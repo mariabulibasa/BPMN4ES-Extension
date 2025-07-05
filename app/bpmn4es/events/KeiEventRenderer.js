@@ -1,7 +1,7 @@
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
 import { append as svgAppend, attr as svgAttr, create as svgCreate, remove as svgRemove } from 'tiny-svg';
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
-import { hasExtensionElement, getExtensionElement } from './util.js';
+import { hasExtensionElement, getExtensionElement } from '../util.js';
 
 const HIGH_PRIORITY = 2001;
 
@@ -13,7 +13,6 @@ export default class KeiEventRenderer extends BaseRenderer {
 
   canRender(element) {
     const bo = getBusinessObject(element);
-    // Only render intermediate throws & boundary events with a KEI
     return (is(element, 'bpmn:IntermediateThrowEvent') || is(element, 'bpmn:BoundaryEvent') || is(element, 'bpmn:IntermediateCatchEvent') ||
       is(element, 'bpmn:StartEvent') || is(element, 'bpmn:EndEvent'))
       && !element.labelTarget
@@ -48,20 +47,6 @@ export default class KeiEventRenderer extends BaseRenderer {
       });
       iconText.textContent = kei.icon;
       svgAppend(parentGfx, iconText);
-    }
-
-    if (kei?.targetValue) {
-      const valueText = svgCreate('text');
-      svgAttr(valueText, {
-        'class': 'kei-deco',
-        x: element.width / 2,
-        y: element.height / 2 + 35,
-        'font-size': '11px',
-        'text-anchor': 'middle',
-        fill: '#333'
-      });
-      valueText.textContent = kei.targetValue + ' ' + kei.unit;
-      svgAppend(parentGfx, valueText);
     }
 
     // Check for mismatch between boundary and host KEI

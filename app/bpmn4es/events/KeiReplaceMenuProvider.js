@@ -1,70 +1,6 @@
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
-import { getExtensionElement } from './util.js';
-
-const INDICATORS = [
-  {
-    category: 'energy',
-    indicators: [
-      { name: 'Energy Consumption',    
-        id: 'energy-consumption',    
-        icon_name: 'bolt',                  
-        unit: 'kwh',
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent'] 
-      },
-      { name: 'Renewable Energy',      
-        id: 'renewable-energy',      
-        icon_name: 'sunny',                 
-        unit: 'kwh', 
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent'] 
-      },
-      { name: 'Transportation Energy', 
-        id: 'transportation-energy', 
-        icon_name: 'local_shipping',        
-        unit: 'kwh',
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent']
-      },
-      { name: 'Battery',               
-        id: 'battery-charging-full', 
-        icon_name: 'battery_charging_full', 
-        unit: '%',
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:EndEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent']
-      }
-    ]
-  },
-  {
-    category: 'emissions',
-    indicators: [
-      { name: 'Carbon Emissions',      
-        id: 'carbon-emissions',      
-        icon_name: 'co2',                   
-        unit: 'kg',
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent']
-      }
-    ]
-  },
-  {
-    category: 'waste',
-    indicators: [
-      { name: 'Recyclable Waste',      
-        id: 'recyclable-waste',      
-        icon_name: 'recycling',             
-        unit: 'kg',
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent']
-      }
-    ]
-  },
-  {
-    category: 'water',
-    indicators: [
-      { name: 'Water Consumption',     
-        id: 'water-waste',           
-        icon_name: 'water_drop',            
-        unit: 'liters',
-        allowedTypes: ['bpmn:StartEvent', 'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent', 'bpmn:BoundaryEvent']
-      }
-    ]
-  }
-];
+import { getExtensionElement } from '../util.js';
+import { INDICATORS_EVENTS } from '../KeiTypes.js';
 
 export default function KeiReplaceMenuProvider(
   popupMenu,
@@ -104,7 +40,7 @@ KeiReplaceMenuProvider.prototype.getEntries = function(element) {
   const type = element.type;
 
   // Get all indicators with their category and filter by allowed types
-  const allowedIndicators = INDICATORS
+  const allowedIndicators = INDICATORS_EVENTS
     .flatMap(cat => cat.indicators.map(indicator => ({
       ...indicator,
       category: cat.category
@@ -116,13 +52,12 @@ KeiReplaceMenuProvider.prototype.getEntries = function(element) {
   // BoundaryEvent KEI must match host's KEI
   if (type === 'bpmn:BoundaryEvent') {
     const hostBo = element.host && getBusinessObject(element.host);
-    const env = getExtensionElement(hostBo, 'bpmn4es:environmentalIndicators');
-    const indicators = env?.indicators || [];
+  const hostEnv = getExtensionElement(hostBo, 'bpmn4es:environmentalIndicators');
+  const hostIndicators = hostEnv?.indicators || [];
 
-    if (indicators.length === 0) return [];
-
-    const hostKEI = indicators[0];
-
+  // If host has KEI attached then only allow that one as an option in the replace menu
+  if (hostIndicators.length > 0) {
+    const hostKEI = hostIndicators[0];
     const matching = allowedIndicators.find(ind => ind.id === hostKEI.id);
     if (!matching) return [];
 
@@ -132,6 +67,13 @@ KeiReplaceMenuProvider.prototype.getEntries = function(element) {
     ];
   }
 
+  // If host has no KEI then allow all indicators
+  return allowedIndicators.flatMap(indicator => [
+    makeKeiEntry(this, element, indicator, false), // Interrupting
+    makeKeiEntry(this, element, indicator, true)   // Non-Interrupting
+  ]);
+}
+
   // For intermediate events apply throw/catch modes
   if (type === 'bpmn:IntermediateThrowEvent' || type === 'bpmn:IntermediateCatchEvent') {
     return allowedIndicators.flatMap(indicator => [
@@ -140,7 +82,7 @@ KeiReplaceMenuProvider.prototype.getEntries = function(element) {
     ]);
   }
 
-  //For start or end events there should be no additional text 
+  // For start or end events there should be no additional text in the menu
   if (type === 'bpmn:StartEvent' || type === 'bpmn:EndEvent') {
     return allowedIndicators.map(indicator => makeKeiEntry(this, element, indicator, null));
   }
