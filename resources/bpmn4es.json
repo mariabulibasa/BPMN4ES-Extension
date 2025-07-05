@@ -9,6 +9,7 @@
   "types": [
     {
       "name": "keyEnvironmentalIndicator",
+      "superClass": ["Element"],
       "properties": [
       	{
           "name": "id",
