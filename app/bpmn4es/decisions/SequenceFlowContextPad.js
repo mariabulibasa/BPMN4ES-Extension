@@ -3,9 +3,10 @@ import { openKeiDialog } from './KeiDialog';
 import { KEI_SHORT_NAMES_EXPRESSION }  from '../KeiTypes';
 
 export default class SequenceFlowContextPad {
-  constructor(contextPad, modeling) {
+  constructor(contextPad, modeling, moddle) {
     this.contextPad = contextPad;
     this.modeling = modeling;
+    this.moddle = moddle;
 
     contextPad.registerProvider(this);
   }
@@ -96,15 +97,16 @@ export default class SequenceFlowContextPad {
 
     // Open the dialog and update the sequence flow upon confirmation
     openKeiDialog(availableVariables, (expression) => {
+      const formalExpression = this.moddle.create('bpmn:FormalExpression', {
+        body: expression
+      }); 
+
       this.modeling.updateProperties(sequenceFlowElement, {
         name: expression,
-        conditionExpression: {
-          'xsi:type': 'bpmn:tFormalExpression',
-          body: expression
-        }
+        conditionExpression: formalExpression
       });
     });
   }
 }
 
-SequenceFlowContextPad.$inject = ['contextPad', 'modeling'];
+SequenceFlowContextPad.$inject = ['contextPad', 'modeling', 'moddle'];
